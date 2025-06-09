@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const userRoutes = require("./routes/userRoutes");
+const questionsRoutes = require("./routes/questionsRoutes");
 
 const app = express();
 app.use(express.json());
@@ -37,3 +38,4 @@ mongoose
   .catch((err) => console.log("MongoDB Connection Error:", err));
 
 app.use("/api/v1", userRoutes);
+app.use("/api/v1", questionsRoutes);

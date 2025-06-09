@@ -1,4 +1,6 @@
 const { validationResult } = require("express-validator");
+const cloudinary = require("../config/cloudinaryConfig");
+const { getCloudinaryPublicId } = require("../utils/cloudinaryUtils");
 const Questions = require("../models/questions");
 
 exports.uploadQuestion = async (req, res) => {
@@ -8,14 +10,8 @@ exports.uploadQuestion = async (req, res) => {
   }
 
   try {
-    const {
-      subject,
-      questionType,
-      question,
-      options,
-      correctAnswer,
-      points,
-    } = req.body;
+    const { subject, questionType, question, options, correctAnswer, points } =
+      req.body;
 
     if (!subject || !questionType || !correctAnswer) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -31,16 +27,12 @@ exports.uploadQuestion = async (req, res) => {
       prompt = question;
     } else {
       if (!req.files || !req.files.questionImage) {
-        return res
-          .status(400)
-          .json({ message: "Question image is required." });
+        return res.status(400).json({ message: "Question image is required." });
       }
       prompt = req.files.questionImage[0].path.replace(/\\/g, "/");
     }
 
-    const parsedOptions = options
-      ? JSON.parse(options)
-      : [];
+    const parsedOptions = options ? JSON.parse(options) : [];
 
     const newQuestion = new Questions({
       subject,
@@ -60,6 +52,93 @@ exports.uploadQuestion = async (req, res) => {
     });
   } catch (error) {
     console.error("Upload Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+exports.updateQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { subject, questionType, question, options, correctAnswer, points } =
+      req.body;
+
+    const existingQuestion = await Questions.findById(id);
+    if (!existingQuestion) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    if (!subject || !questionType || !correctAnswer) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    let prompt = existingQuestion.prompt;
+
+    if (questionType === "text") {
+      if (!question) {
+        return res
+          .status(400)
+          .json({ message: "Text question prompt is required." });
+      }
+      prompt = question;
+
+      // Clean up old image if switching from image to text
+      if (existingQuestion.promptType === "image") {
+        const publicId = getCloudinaryPublicId(existingQuestion.prompt);
+        if (publicId) await cloudinary.uploader.destroy(publicId);
+      }
+    } else {
+      if (req.files && req.files.questionImage) {
+        // Delete old image
+        if (existingQuestion.promptType === "image") {
+          const publicId = getCloudinaryPublicId(existingQuestion.prompt);
+          if (publicId) await cloudinary.uploader.destroy(publicId);
+        }
+
+        prompt = req.files.questionImage[0].path.replace(/\\/g, "/");
+      }
+    }
+
+    const parsedOptions = options ? JSON.parse(options) : [];
+
+    existingQuestion.subject = subject;
+    existingQuestion.promptType = questionType;
+    existingQuestion.prompt = prompt;
+    existingQuestion.options = parsedOptions;
+    existingQuestion.correctAnswer = correctAnswer;
+    existingQuestion.points = !isNaN(Number(points))
+      ? Number(points)
+      : existingQuestion.points;
+
+    await existingQuestion.save();
+
+    res.status(200).json({
+      message: "Question updated successfully",
+      question: existingQuestion,
+    });
+  } catch (error) {
+    console.error("Update Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+exports.deleteQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const question = await Questions.findById(id);
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    if (question.promptType === "image") {
+      const publicId = getCloudinaryPublicId(question.prompt);
+      if (publicId) await cloudinary.uploader.destroy(publicId);
+    }
+
+    await question.deleteOne();
+
+    res.status(200).json({ message: "Question deleted successfully" });
+  } catch (error) {
+    console.error("Delete Error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };

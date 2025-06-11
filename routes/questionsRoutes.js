@@ -8,7 +8,7 @@ const {
 } = require("../controllers/questionsController");
 
 router.post(
-  "/upload",
+  "/questions/upload",
   upload.fields([{ name: "questionImage", maxCount: 1 }]),
   uploadQuestion
 );

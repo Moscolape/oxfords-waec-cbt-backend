@@ -190,7 +190,7 @@ exports.submitQuiz = async (req, res) => {
     }
 
     const questionIds = Object.keys(answers || {});
-    const questions = await Question.find({ _id: { $in: questionIds } });
+    const questions = await Questions.find({ _id: { $in: questionIds } });
 
     let score = 0;
     const pointsPerQuestion = 2;

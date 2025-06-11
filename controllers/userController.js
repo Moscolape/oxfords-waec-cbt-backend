@@ -1,5 +1,5 @@
 const User = require("../models/users");
-const bcrypt = require("bcryptjs");
+// const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.registerUser = async (req, res) => {
@@ -11,10 +11,10 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // const salt = await bcrypt.genSalt(10);
+    // const hashedPassword = await bcrypt.hash(password, salt);
 
-    user = new User({ username, password: hashedPassword, role });
+    user = new User({ username, password, role });
     await user.save();
 
     res.status(201).json({ message: "User registered successfully" });

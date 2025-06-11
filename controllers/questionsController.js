@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const cloudinary = require("../config/cloudinaryConfig");
 const { getCloudinaryPublicId } = require("../utils/cloudinaryUtils");
 const Questions = require("../models/questions");
+const TestSubmissions = require("../models/submissions");
 
 exports.uploadQuestion = async (req, res) => {
   const errors = validationResult(req);
@@ -145,13 +146,13 @@ exports.deleteQuestion = async (req, res) => {
 
 exports.getAllQuestions = async (req, res) => {
   try {
-    const { subject, page = 1, limit = 50 } = req.query;
+    const { subject, page = 1, limit = 10 } = req.query;
 
     const filter = {};
     if (subject) filter.subject = subject;
 
-    const parsedPage = parseInt(page, 50);
-    const parsedLimit = parseInt(limit, 50);
+    const parsedPage = parseInt(page, 10);
+    const parsedLimit = parseInt(limit, 0);
     const skip = (parsedPage - 1) * parsedLimit;
 
     const questions = await Questions.find(filter)
@@ -178,3 +179,59 @@ exports.getAllQuestions = async (req, res) => {
   }
 };
 
+exports.submitQuiz = async (req, res) => {
+  try {
+    const { answers, subject, name, testType } = req.body;
+
+    if (!name || !subject || !testType) {
+      return res
+        .status(400)
+        .json({ message: "Name, subject, and test type are required" });
+    }
+
+    const questionIds = Object.keys(answers || {});
+    const questions = await Question.find({ _id: { $in: questionIds } });
+
+    let score = 0;
+    const pointsPerQuestion = 2;
+    const totalPoints = 50 * pointsPerQuestion;
+
+    for (const question of questions) {
+      const userAnswer = answers[question._id];
+      if (
+        question.type === "objective" &&
+        userAnswer === question.correctAnswer
+      ) {
+        score += pointsPerQuestion;
+      }
+    }
+
+    const percentage = (score / totalPoints) * 100;
+    const now = new Date();
+
+    const submission = new TestSubmissions({
+      name,
+      subject,
+      testType,
+      answers,
+      score,
+      percentage: Math.round(percentage),
+      totalPoints,
+      submittedAt: now,
+    });
+
+    await submission.save();
+
+    res.status(200).json({
+      message: "Quiz submitted successfully",
+      score,
+      percentage: Math.round(percentage),
+      totalPoints,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Error submitting quiz", error: error.message });
+  }
+};

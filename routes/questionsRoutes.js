@@ -5,7 +5,8 @@ const {
   uploadQuestion,
   updateQuestion,
   deleteQuestion,
-  getAllQuestions
+  getAllQuestions,
+  submitQuiz
 } = require("../controllers/questionsController");
 
 router.post(
@@ -21,5 +22,6 @@ router.put(
 router.delete("/questions/:id", deleteQuestion);
 
 router.get('/questions', getAllQuestions);
+router.post('/questions/submit', submitQuiz);
 
 module.exports = router;

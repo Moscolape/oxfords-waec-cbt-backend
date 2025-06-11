@@ -4,6 +4,7 @@ const upload = require("../config/multerConfig");
 const {
   uploadQuestion,
   updateQuestion,
+  deleteQuestion
 } = require("../controllers/questionsController");
 
 router.post(

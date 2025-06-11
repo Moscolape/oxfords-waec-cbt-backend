@@ -1,5 +1,4 @@
 const User = require("../models/users");
-// const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.registerUser = async (req, res) => {
@@ -10,9 +9,6 @@ exports.registerUser = async (req, res) => {
     if (user) {
       return res.status(400).json({ message: "User already exists" });
     }
-
-    // const salt = await bcrypt.genSalt(10);
-    // const hashedPassword = await bcrypt.hash(password, salt);
 
     user = new User({ username, password, role });
     await user.save();
@@ -33,8 +29,7 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid username or password" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    if (user.password !== password) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -49,7 +44,7 @@ exports.loginUser = async (req, res) => {
     res.status(200).json({
       message: "Login successful. Redirecting...",
       token,
-      role
+      role,
     });
   } catch (error) {
     console.error("Login Error:", error);

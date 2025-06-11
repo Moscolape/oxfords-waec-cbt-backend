@@ -238,10 +238,26 @@ exports.submitQuiz = async (req, res) => {
 
 exports.getAllSubmissions = async (req, res) => {
   try {
-    const submissions = await TestSubmissions.find().sort({ submittedAt: -1 });
+    const { page = 1, limit = 10 } = req.query;
+
+    const parsedPage = parseInt(page, 10);
+    const parsedLimit = parseInt(limit, 10);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const submissions = await TestSubmissions.find()
+      .sort({ submittedAt: -1 })
+      .skip(skip)
+      .limit(parsedLimit);
+
+    const totalCount = await TestSubmissions.countDocuments();
+    const totalPages = Math.ceil(totalCount / parsedLimit);
+
     res.status(200).json({
       message: "Submissions fetched successfully",
       submissions,
+      totalCount,
+      currentPage: parsedPage,
+      totalPages,
     });
   } catch (error) {
     console.error(error);

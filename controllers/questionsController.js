@@ -142,3 +142,39 @@ exports.deleteQuestion = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+exports.getAllQuestions = async (req, res) => {
+  try {
+    const { subject, page = 1, limit = 50 } = req.query;
+
+    const filter = {};
+    if (subject) filter.subject = subject;
+
+    const parsedPage = parseInt(page, 50);
+    const parsedLimit = parseInt(limit, 50);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const questions = await Questions.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parsedLimit);
+
+    const totalCount = await Questions.countDocuments(filter);
+    const totalPages = Math.ceil(totalCount / parsedLimit);
+
+    res.status(200).json({
+      message: "Questions fetched successfully",
+      questions,
+      totalPages,
+      currentPage: parsedPage,
+      totalCount,
+    });
+  } catch (error) {
+    console.error("Fetch Error:", error);
+    res.status(500).json({
+      message: "Error retrieving questions",
+      error: error.message,
+    });
+  }
+};
+

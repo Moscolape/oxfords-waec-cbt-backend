@@ -4,7 +4,8 @@ const upload = require("../config/multerConfig");
 const {
   uploadQuestion,
   updateQuestion,
-  deleteQuestion
+  deleteQuestion,
+  getAllQuestions
 } = require("../controllers/questionsController");
 
 router.post(
@@ -18,5 +19,7 @@ router.put(
   updateQuestion
 );
 router.delete("/questions/:id", deleteQuestion);
+
+router.get('/questions', getAllQuestions);
 
 module.exports = router;

@@ -4,7 +4,7 @@ const upload = require("../config/multerConfig");
 const {
   uploadQuestion,
   updateQuestion,
-} = require("../controllers/questionController");
+} = require("../controllers/questionsController");
 
 router.post(
   "/upload",

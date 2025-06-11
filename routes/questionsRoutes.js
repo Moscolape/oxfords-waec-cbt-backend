@@ -18,7 +18,7 @@ router.post(
 router.post('/questions/submit', submitQuiz);
 
 router.get('/questions', getAllQuestions);
-router.get('/test-submissions', getAllSubmissions);
+router.get('/testSubmissions', getAllSubmissions);
 
 router.put(
   "/questions/:id",

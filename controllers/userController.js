@@ -51,3 +51,30 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+exports.getAllStudents = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const query = {
+      role: "student",
+    };
+
+    const students = await User.find(query)
+      .select("username password")
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments(query);
+
+    res.status(200).json({
+      students,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error("Fetch Students Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};

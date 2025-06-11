@@ -6,7 +6,8 @@ const {
   updateQuestion,
   deleteQuestion,
   getAllQuestions,
-  submitQuiz
+  submitQuiz,
+  getAllSubmissions
 } = require("../controllers/questionsController");
 
 router.post(
@@ -14,6 +15,11 @@ router.post(
   upload.fields([{ name: "questionImage", maxCount: 1 }]),
   uploadQuestion
 );
+router.post('/questions/submit', submitQuiz);
+
+router.get('/questions', getAllQuestions);
+router.get('/test-submissions', getAllSubmissions);
+
 router.put(
   "/questions/:id",
   upload.fields([{ name: "questionImage", maxCount: 1 }]),
@@ -21,7 +27,5 @@ router.put(
 );
 router.delete("/questions/:id", deleteQuestion);
 
-router.get('/questions', getAllQuestions);
-router.post('/questions/submit', submitQuiz);
 
 module.exports = router;

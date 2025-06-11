@@ -235,3 +235,19 @@ exports.submitQuiz = async (req, res) => {
       .json({ message: "Error submitting quiz", error: error.message });
   }
 };
+
+exports.getAllSubmissions = async (req, res) => {
+  try {
+    const submissions = await TestSubmissions.find().sort({ submittedAt: -1 });
+    res.status(200).json({
+      message: "Submissions fetched successfully",
+      submissions,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error fetching submissions",
+      error: error.message,
+    });
+  }
+};

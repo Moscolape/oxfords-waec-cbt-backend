@@ -146,12 +146,12 @@ exports.deleteQuestion = async (req, res) => {
 
 exports.getAllQuestions = async (req, res) => {
   try {
-    const { subject, page = 1, limit = 10 } = req.query;
+    const { subject, page = 1, limit = 50 } = req.query;
 
     const filter = {};
     if (subject) filter.subject = subject;
 
-    const parsedPage = parseInt(page, 10);
+    const parsedPage = parseInt(page, 50);
     const parsedLimit = parseInt(limit, 0);
     const skip = (parsedPage - 1) * parsedLimit;
 

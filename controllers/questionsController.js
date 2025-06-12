@@ -156,7 +156,7 @@ exports.getAllQuestions = async (req, res) => {
     const skip = (parsedPage - 1) * parsedLimit;
 
     const questions = await Questions.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .skip(skip)
       .limit(parsedLimit);
 

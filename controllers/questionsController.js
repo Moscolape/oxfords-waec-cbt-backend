@@ -238,18 +238,21 @@ exports.submitQuiz = async (req, res) => {
 
 exports.getAllSubmissions = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, subject } = req.query;
 
     const parsedPage = parseInt(page, 10);
     const parsedLimit = parseInt(limit, 10);
     const skip = (parsedPage - 1) * parsedLimit;
 
-    const submissions = await TestSubmissions.find()
+    const filter = subject && subject !== "All" ? { subject } : {};
+
+    const totalCount = await TestSubmissions.countDocuments(filter);
+
+    const submissions = await TestSubmissions.find(filter)
       .sort({ submittedAt: -1 })
       .skip(skip)
       .limit(parsedLimit);
 
-    const totalCount = await TestSubmissions.countDocuments();
     const totalPages = Math.ceil(totalCount / parsedLimit);
 
     res.status(200).json({

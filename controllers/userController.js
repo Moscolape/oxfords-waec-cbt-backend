@@ -56,12 +56,10 @@ exports.getAllStudents = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
 
-    const query = {
-      role: "student",
-    };
+    const query = { role: "student" };
 
     const students = await User.find(query)
-      .select("username password")
+      .select("_id username password")
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
 
@@ -75,6 +73,23 @@ exports.getAllStudents = async (req, res) => {
     });
   } catch (error) {
     console.error("Fetch Students Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+exports.deleteSingleStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await User.findOneAndDelete({ _id: id, role: "student" });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.status(200).json({ message: "Student deleted successfully", student });
+  } catch (error) {
+    console.error("Delete Student Error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };

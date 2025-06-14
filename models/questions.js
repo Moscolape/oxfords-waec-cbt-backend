@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const questionSchema = new Schema(
@@ -6,18 +6,31 @@ const questionSchema = new Schema(
     subject: {
       type: String,
       required: true,
-      enum: ['mathematics', 'english'],
+      enum: [
+        "english",
+        "mathematics",
+        "biology",
+        "chemistry",
+        "physics",
+        "government",
+        "crs",
+        "economics",
+        "literature",
+        "fmaths",
+        "fishery",
+        "civic"
+      ],
     },
     type: {
       type: String,
       required: true,
-      enum: ['multiple-choice', 'objective', 'subjective'],
+      enum: ["multiple-choice", "objective", "subjective"],
     },
     promptType: {
       type: String,
-      enum: ['text', 'image'],
+      enum: ["text", "image"],
       required: true,
-      default: 'text',
+      default: "text",
     },
     prompt: {
       type: String,
@@ -39,4 +52,4 @@ const questionSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Questions', questionSchema);
+module.exports = mongoose.model("Questions", questionSchema);

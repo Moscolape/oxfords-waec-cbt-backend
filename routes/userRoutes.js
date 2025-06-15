@@ -8,6 +8,7 @@ const {
   deleteSingleAdmin,
   getAllStaffs,
   deleteSingleStaff,
+  bulkUpdateStatus
 } = require("../controllers/userController");
 
 const router = express.Router();

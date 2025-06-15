@@ -3,14 +3,14 @@ const jwt = require("jsonwebtoken");
 
 exports.registerUser = async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password, role, status } = req.body;
 
     let user = await User.findOne({ username });
     if (user) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    user = new User({ username, password, role });
+    user = new User({ username, password, role, status });
     await user.save();
 
     res.status(201).json({ message: "User registered successfully" });
@@ -40,11 +40,13 @@ exports.loginUser = async (req, res) => {
     );
 
     const role = user.role;
+    const status = user.status;
 
     res.status(200).json({
       message: "Login successful. Redirecting...",
       token,
       role,
+      status
     });
   } catch (error) {
     console.error("Login Error:", error);
@@ -175,5 +177,30 @@ exports.deleteSingleStaff = async (req, res) => {
   } catch (error) {
     console.error("Delete Staff Error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+exports.bulkUpdateStatus = async (req, res) => {
+  const { role } = req.params;
+  const { status } = req.body;
+
+  if (!["student", "staff", "admin"].includes(role)) {
+    return res.status(400).json({ message: "Invalid role specified." });
+  }
+
+  if (!["active", "inactive"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status value." });
+  }
+
+  try {
+    const result = await User.updateMany({ role }, { status });
+
+    res.json({
+      message: `All ${role}s marked as ${status}.`,
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("Bulk status update error:", error);
+    res.status(500).json({ message: "Internal server error." });
   }
 };

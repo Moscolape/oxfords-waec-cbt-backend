@@ -20,5 +20,6 @@ router.get("/auth/getAllAdmins", getAllAdmins);
 router.delete("/auth/deleteAdmin/:id", deleteSingleAdmin);
 router.get("/auth/getAllStaff", getAllStaffs);
 router.delete("/auth/deleteStaff/:id", deleteSingleStaff);
+router.patch("/auth/bulk-status-update/:role", bulkUpdateStatus);
 
 module.exports = router;

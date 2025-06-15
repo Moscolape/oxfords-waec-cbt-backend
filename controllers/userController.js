@@ -34,7 +34,7 @@ exports.loginUser = async (req, res) => {
     }
 
     if (user.status === "inactive") {
-      return res.status(400).json({ message: "Sorry! Logins are currently inactive" });
+      return res.status(400).json({ message: "Sorry! Your logins are currently inactive" });
     }
 
     const token = jwt.sign(

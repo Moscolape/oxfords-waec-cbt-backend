@@ -93,3 +93,87 @@ exports.deleteSingleStudent = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+exports.getAllAdmins = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const query = { role: "admin" };
+
+    const admins = await User.find(query)
+      .select("_id username password")
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments(query);
+
+    res.status(200).json({
+      admins,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error("Fetch Admins Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+exports.deleteSingleAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const admin = await User.findOneAndDelete({ _id: id, role: "admin" });
+
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    res.status(200).json({ message: "Admin deleted successfully", admin });
+  } catch (error) {
+    console.error("Delete Admin Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+exports.getAllStaffs = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const query = { role: "staff" };
+
+    const staffs = await User.find(query)
+      .select("_id username password")
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments(query);
+
+    res.status(200).json({
+      staffs,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error("Fetch Staffs Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+exports.deleteSingleStaff = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const staff = await User.findOneAndDelete({ _id: id, role: "staff" });
+
+    if (!staff) {
+      return res.status(404).json({ message: "Staff not found" });
+    }
+
+    res.status(200).json({ message: "Staff deleted successfully", staff });
+  } catch (error) {
+    console.error("Delete Staff Error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};

@@ -35,6 +35,12 @@ exports.uploadQuestion = async (req, res) => {
 
     const parsedOptions = options ? JSON.parse(options) : [];
 
+    if (!parsedOptions.includes(correctAnswer)) {
+      return res.status(400).json({
+        message: "Correct answer must match one of the provided options.",
+      });
+    }
+
     const newQuestion = new Questions({
       subject,
       type: "objective",

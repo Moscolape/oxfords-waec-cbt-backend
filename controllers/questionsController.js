@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const cloudinary = require("../config/cloudinaryConfig");
 const { getCloudinaryPublicId } = require("../utils/cloudinaryUtils");
+const logActivity = require("../utils/logActivity");
 
 const Questions = require("../models/questions");
 const TestSubmissions = require("../models/submissions");

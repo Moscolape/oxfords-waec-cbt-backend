@@ -1,5 +1,6 @@
 const User = require("../models/users");
 const jwt = require("jsonwebtoken");
+const logActivity = require("../utils/logActivity");
 
 exports.registerUser = async (req, res) => {
   try {
@@ -13,6 +14,13 @@ exports.registerUser = async (req, res) => {
     user = new User({ username, password, role, status });
     await user.save();
 
+    await logActivity({
+      action: "User Registered",
+      actorId: user._id,
+      role,
+      details: `${username} registered as ${role}`,
+    });
+
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error("Registration Error:", error);
@@ -25,6 +33,7 @@ exports.loginUser = async (req, res) => {
     const { username, password } = req.body;
 
     const user = await User.findOne({ username });
+
     if (!user) {
       return res.status(400).json({ message: "Invalid username or password" });
     }
@@ -34,7 +43,9 @@ exports.loginUser = async (req, res) => {
     }
 
     if (user.status === "inactive") {
-      return res.status(400).json({ message: "Sorry! Your logins are currently inactive" });
+      return res
+        .status(400)
+        .json({ message: "Sorry! Your logins are currently inactive" });
     }
 
     const token = jwt.sign(
@@ -46,11 +57,18 @@ exports.loginUser = async (req, res) => {
     const role = user.role;
     const status = user.status;
 
+    await logActivity({
+      action: "User Logged In",
+      actorId: user._id,
+      role: user.role,
+      details: `${user.username} logged in`,
+    });
+
     res.status(200).json({
       message: "Login successful. Redirecting...",
       token,
       role,
-      status
+      status,
     });
   } catch (error) {
     console.error("Login Error:", error);
@@ -92,6 +110,13 @@ exports.deleteSingleStudent = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
+
+    await logActivity({
+      action: `Deleted ${student.role}`,
+      actorId: req.userId,
+      role: req.userRole,
+      details: `${student.username} (${student._id}) deleted`,
+    });
 
     res.status(200).json({ message: "Student deleted successfully", student });
   } catch (error) {
@@ -135,6 +160,13 @@ exports.deleteSingleAdmin = async (req, res) => {
       return res.status(404).json({ message: "Admin not found" });
     }
 
+    await logActivity({
+      action: `Deleted ${admin.role}`,
+      actorId: req.userId,
+      role: req.userRole,
+      details: `${admin.username} (${admin._id}) deleted`,
+    });
+
     res.status(200).json({ message: "Admin deleted successfully", admin });
   } catch (error) {
     console.error("Delete Admin Error:", error);
@@ -177,6 +209,13 @@ exports.deleteSingleStaff = async (req, res) => {
       return res.status(404).json({ message: "Staff not found" });
     }
 
+    await logActivity({
+      action: `Deleted ${staff.role}`,
+      actorId: req.userId,
+      role: req.userRole,
+      details: `${staff.username} (${staff._id}) deleted`,
+    });
+
     res.status(200).json({ message: "Staff deleted successfully", staff });
   } catch (error) {
     console.error("Delete Staff Error:", error);
@@ -198,6 +237,13 @@ exports.bulkUpdateStatus = async (req, res) => {
 
   try {
     const result = await User.updateMany({ role }, { status });
+
+    await logActivity({
+      action: `Bulk Status Update`,
+      actorId: req.userId,
+      role: req.userRole,
+      details: `All ${role}s marked as ${status}`,
+    });
 
     res.json({
       message: `All ${role}s marked as ${status}.`,

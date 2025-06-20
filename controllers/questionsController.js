@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const cloudinary = require("../config/cloudinaryConfig");
 const { getCloudinaryPublicId } = require("../utils/cloudinaryUtils");
+
 const Questions = require("../models/questions");
 const TestSubmissions = require("../models/submissions");
 
@@ -52,6 +53,12 @@ exports.uploadQuestion = async (req, res) => {
     });
 
     await newQuestion.save();
+    await logActivity({
+      action: "Question Uploaded",
+      actorId: req.userId,
+      role: req.userRole,
+      details: `Question added for ${subject}`,
+    });
 
     res.status(201).json({
       message: "Question uploaded successfully",
@@ -88,14 +95,12 @@ exports.updateQuestion = async (req, res) => {
       }
       prompt = question;
 
-      // Clean up old image if switching from image to text
       if (existingQuestion.promptType === "image") {
         const publicId = getCloudinaryPublicId(existingQuestion.prompt);
         if (publicId) await cloudinary.uploader.destroy(publicId);
       }
     } else {
       if (req.files && req.files.questionImage) {
-        // Delete old image
         if (existingQuestion.promptType === "image") {
           const publicId = getCloudinaryPublicId(existingQuestion.prompt);
           if (publicId) await cloudinary.uploader.destroy(publicId);
@@ -117,6 +122,12 @@ exports.updateQuestion = async (req, res) => {
       : existingQuestion.points;
 
     await existingQuestion.save();
+    await logActivity({
+      action: "Question Updated",
+      actorId: req.userId,
+      role: req.userRole,
+      details: `Question (${id}) updated for ${subject}`,
+    });
 
     res.status(200).json({
       message: "Question updated successfully",
@@ -142,6 +153,12 @@ exports.deleteQuestion = async (req, res) => {
     }
 
     await question.deleteOne();
+    await logActivity({
+      action: "Question Deleted",
+      actorId: req.userId,
+      role: req.userRole,
+      details: `Question (${id}) deleted`,
+    });
 
     res.status(200).json({ message: "Question deleted successfully" });
   } catch (error) {
@@ -228,6 +245,12 @@ exports.submitQuiz = async (req, res) => {
     });
 
     await submission.save();
+    await logActivity({
+      action: "Quiz Submitted",
+      actorId: req.userId || null,
+      role: req.userRole || "student",
+      details: `${name} submitted ${subject} (${testType}) test`,
+    });
 
     res.status(200).json({
       message: "Quiz submitted successfully",

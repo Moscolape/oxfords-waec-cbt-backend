@@ -9,6 +9,9 @@ const {
   submitQuiz,
   getAllSubmissions
 } = require("../controllers/questionsController");
+const { isAuthenticated } = require("../middleware/auth");
+
+
 
 router.post(
   "/questions/upload",

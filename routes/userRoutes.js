@@ -15,7 +15,7 @@ const { isAuthenticated } = require("../middleware/auth");
 
 
 router.post("/auth/register", isAuthenticated, registerUser);
-router.post("/auth/login", isAuthenticated, loginUser);
+router.post("/auth/login", loginUser);
 router.get("/auth/getAllStudents", getAllStudents);
 router.delete("/auth/deleteStudent/:id", isAuthenticated, deleteSingleStudent);
 router.get("/auth/getAllAdmins", getAllAdmins);
